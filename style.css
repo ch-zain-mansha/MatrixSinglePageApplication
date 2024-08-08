@@ -1,0 +1,19 @@
+*{
+    margin: 0;
+    padding: 0;
+}
+#create_matrix{
+    margin-left: 45%;
+    background-color: cadetblue;
+    width: 160px;
+    height: 30px;
+    border-radius: 12px;
+    cursor: pointer;
+    margin-top: 20px;
+}
+.matrix-container {
+    margin-bottom: 20px;
+}
+.matrix-table {
+    margin-bottom: 20px;
+}

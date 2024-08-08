@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Matrix Operations</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.3.0/fonts/remixicon.css" rel="stylesheet"/>
+</head>
+<body>
+    <button id="create_single_matrix">Create Matrix</button>
+    <div class="left_container">
+        <form action="">
+            <label for="first">Choose a Matrix:</label>
+            <select name="first" id="first">
+                <option value="" disabled selected>Select a matrix</option>
+            </select>
+            <br><br>
+        </form>
+        <div id="matrix_display"></div>
+        <div id="all_matrices_display"></div>
+    </div>
+    <div class="center_container">
+        <button id="default_icon" value="+">+</button>
+        <button id="selected_icon">+</button>
+        <div id="icons" class="icons">
+            <button value="+" id="plus">+</button>
+            <button value="-" id="minus">-</button>
+            <button value="*" id="multiply">*</button>
+            <button value="transpose" id="transpose">Transpose</button>
+        </div>
+        <button id="icons_dropdown_down_button"><i class="ri-arrow-down-wide-line"></i></button>
+        <button id="icons_dropdown_up_button"><i class="ri-arrow-up-wide-line"></i></button>
+    </div>
+    <div class="right_container">
+        <form action="">
+            <label for="second">Choose a Matrix:</label>
+            <select name="second" id="second">
+                <option value="" disabled selected>Select a matrix</option>
+            </select>
+            <br><br>
+        </form>
+        <div id="second_matrix_display"></div>
+        <div id="all_matrices_display_second"></div>
+    </div>
+    <div class="result_container">
+        <h3>Result:</h3>
+        <div id="result_matrix_display"></div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
