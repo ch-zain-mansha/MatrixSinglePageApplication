@@ -1,82 +1,72 @@
-// CREATING MATRIX
 let matrices = [];
-document.getElementById("create_single_matrix").addEventListener("click", () => {
+
+// Function to create a new matrix
+function createMatrix() {
     const rows = prompt("Enter the number of rows for the matrix");
     const cols = prompt("Enter the number of columns for the matrix");
     let matrix = [];
     for (let i = 0; i < rows; i++) {
         matrix[i] = [];
         for (let j = 0; j < cols; j++) {
-            matrix[i][j] = parseInt(prompt(`Enter entry for the matrix at row ${i + 1}, column ${j + 1}`));
-        }}
+            matrix[i][j] = parseInt(prompt(`Enter entry for the matrix at row ${i + 1}, column ${j + 1}`), 10);
+        }
+    }
     matrices.push(matrix);
-    updateDropdowns();
+    updateMatrixDropdowns();
     displayAllMatrices();
-});
+}
 
-
-
-
-// UPDATE DROPDOWN IF NEW MATRIX IS ADDED
-function updateDropdowns() {
-    const dropdown1 = document.getElementById("first");
-    const dropdown2 = document.getElementById("second");
-    dropdown1.innerHTML = '<option value="" disabled selected>Select a matrix</option>';
-    dropdown2.innerHTML = '<option value="" disabled selected>Select a matrix</option>';
+// Update matrix dropdowns when a new matrix is added
+function updateMatrixDropdowns() {
+    const matrixOneDropdown = document.getElementById("matrix-one");
+    const matrixTwoDropdown = document.getElementById("matrix-two");
+    matrixOneDropdown.innerHTML = '<option value="" disabled selected>Select a matrix</option>';
+    matrixTwoDropdown.innerHTML = '<option value="" disabled selected>Select a matrix</option>';
     matrices.forEach((matrix, index) => {
         const option = document.createElement("option");
         option.value = index;
         option.text = `Matrix ${index + 1}`;
-        dropdown1.add(option.cloneNode(true));
-        dropdown2.add(option.cloneNode(true));
+        matrixOneDropdown.add(option.cloneNode(true));
+        matrixTwoDropdown.add(option.cloneNode(true));
     });
-    // WHEN SOMEONE CHANGE SELECTED MATRIX
-    dropdown1.addEventListener("change", (event) => {
-        const selectedMatrixIndex = event.target.value;
-        displayMatrix(matrices[selectedMatrixIndex], "matrix_display");
-    });
-    dropdown2.addEventListener("change", (event) => {
-        const selectedMatrixIndex = event.target.value;
-        displayMatrix(matrices[selectedMatrixIndex], "second_matrix_display");
-    });
+    // Add change event listeners for both dropdowns
+    matrixOneDropdown.addEventListener("change", (event) => handleMatrixSelection(event, "selected-matrix-display"));
+    matrixTwoDropdown.addEventListener("change", (event) => handleMatrixSelection(event, "second-matrix-display"));
 }
 
+// Handle matrix selection and display
+function handleMatrixSelection(event, containerId) {
+    const selectedMatrixIndex = event.target.value;
+    displayMatrix(matrices[selectedMatrixIndex], containerId, selectedMatrixIndex);
+}
 
-
-// DISPLAY MATRIX
+// Display all matrices in the designated areas
 function displayAllMatrices() {
-    const allMatricesDisplay = document.getElementById("all_matrices_display");
-    const secondAllMatricesDisplay = document.getElementById("all_matrices_display_second");
+    const allMatricesDisplay = document.getElementById("all-matrices-display");
+    const secondAllMatricesDisplay = document.getElementById("all-matrices-display-second");
 
     allMatricesDisplay.innerHTML = '';
     secondAllMatricesDisplay.innerHTML = '';
 
     matrices.forEach((matrix, index) => {
-        allMatricesDisplay.innerHTML += `<div class="matrix-container"><h3>Matrix ${index + 1}</h3>${writingMatrixInTable(matrix)}</div>`;
-        secondAllMatricesDisplay.innerHTML += `<div class="matrix-container"><h3>Matrix ${index + 1}</h3>${writingMatrixInTable(matrix)}</div>`;
+        allMatricesDisplay.innerHTML += `<div class="matrix-container"><h3>Matrix ${index + 1}</h3>${matrixToTable(matrix, index)}</div>`;
+        secondAllMatricesDisplay.innerHTML += `<div class="matrix-container"><h3>Matrix ${index + 1}</h3>${matrixToTable(matrix, index)}</div>`;
     });
 }
 
-
-
-
-// DISPLAYING MATRIX WHICH IS SELECTED
-function displayMatrix(matrix, containerId) {
+// Display the selected matrix in the specified container
+function displayMatrix(matrix, containerId, matrixIndex) {
     const matrixDisplay = document.getElementById(containerId);
-    matrixDisplay.innerHTML = writingMatrixInTable(matrix);
+    matrixDisplay.innerHTML = matrixToTable(matrix, matrixIndex);
 }
 
-
-
-
-
-// FOR WRITING MATRIX IN TABLE FORM
-function writingMatrixInTable(matrix) {
+// Convert a matrix to an HTML table format
+function matrixToTable(matrix, matrixIndex) {
     let html = '<table border="1" class="matrix-table">';
-    matrix.forEach(row => {
+    matrix.forEach((row, rowIndex) => {
         html += '<tr>';
-        row.forEach(cell => {
-            html += `<td>${cell}</td>`;
+        row.forEach((cell, colIndex) => {
+            html += `<td data-row="${rowIndex}" data-col="${colIndex}" data-matrix="${matrixIndex}" onclick="editCell(event)">${cell}</td>`;
         });
         html += '</tr>';
     });
@@ -84,15 +74,56 @@ function writingMatrixInTable(matrix) {
     return html;
 }
 
+// Prompt the user to edit a cell value
+function editCell(event) {
+    const cell = event.target;
+    const row = cell.getAttribute('data-row');
+    const col = cell.getAttribute('data-col');
+    const matrixIndex = cell.getAttribute('data-matrix');
+    
+    // Prompt user for new value
+    const newValue = prompt("Enter new value:", cell.innerText);
+    
+    // Update matrix and cell value if valid
+    if (newValue !== null) {
+        const parsedValue = parseInt(newValue, 10);
+        if (!isNaN(parsedValue)) {
+            matrices[matrixIndex][row][col] = parsedValue;
+            cell.innerText = parsedValue;
+            updateMatrixDisplays(); // Update all matrix displays
+        } else {
+            alert("Please enter a valid number.");
+        }
+    }
+}
 
+// Update matrix displays to reflect changes
+function updateMatrixDisplays() {
+    const matrixOneIndex = document.getElementById("matrix-one").value;
+    const matrixTwoIndex = document.getElementById("matrix-two").value;
 
+    if (matrixOneIndex !== "" && matrixOneIndex !== null) {
+        displayMatrix(matrices[matrixOneIndex], "selected-matrix-display", matrixOneIndex);
+    }
+    if (matrixTwoIndex !== "" && matrixTwoIndex !== null) {
+        displayMatrix(matrices[matrixTwoIndex], "second-matrix-display", matrixTwoIndex);
+    }
+    
+    displayAllMatrices(); // Ensure all matrices are updated
+}
 
-//MATRIX OPERATION TO CHECK IF BOTH MATRIX IS SELECTED OR FOR DOING OPERATION
-function performOperation() {
-    const selectedOperation = document.getElementById("default_icon").value;
-    const matrix1Index = document.getElementById("first").value;
-    const matrix2Index = document.getElementById("second").value;
+// Perform the selected matrix operation
+function performMatrixOperation() {
+    const selectedOperation = document.getElementById("operation-select").value;
+    const matrix1Index = document.getElementById("matrix-one").value;
+    const matrix2Index = document.getElementById("matrix-two").value;
     let resultMatrix;
+
+    if (selectedOperation === "") {
+        alert("Please select an operation.");
+        return;
+    }
+
     if (selectedOperation === "+" || selectedOperation === "-" || selectedOperation === "*" || selectedOperation === "transpose") {
         if (selectedOperation !== "transpose" && (matrix1Index === "" || matrix2Index === "")) {
             alert("Please select both matrices.");
@@ -102,20 +133,20 @@ function performOperation() {
         const matrix2 = matrices[matrix2Index];
         switch (selectedOperation) {
             case "+":
-                resultMatrix = matrixAddition(matrix1, matrix2);
+                resultMatrix = addMatrices(matrix1, matrix2);
                 break;
             case "-":
-                resultMatrix = matrixSubtraction(matrix1, matrix2);
+                resultMatrix = subtractMatrices(matrix1, matrix2);
                 break;
             case "*":
-                resultMatrix = matrixMultiplication(matrix1, matrix2);
+                resultMatrix = multiplyMatrices(matrix1, matrix2);
                 break;
             case "transpose":
-                resultMatrix = matrixTranspose(matrix1);
+                resultMatrix = transposeMatrix(matrix1);
                 break;
         }
         if (resultMatrix) {
-            displayMatrix(resultMatrix, "result_matrix_display");
+            displayMatrix(resultMatrix, "result-display");
         } else {
             alert("Operation could not be performed. Check the dimensions of the matrices.");
         }
@@ -124,15 +155,8 @@ function performOperation() {
     }
 }
 
-
-
-
-
-
-
-
-// MATRIX OPERATIONS
-function matrixAddition(matrix1, matrix2) {
+// Add matrices element-wise
+function addMatrices(matrix1, matrix2) {
     if (matrix1.length !== matrix2.length || matrix1[0].length !== matrix2[0].length) {
         alert("Matrices must have the same dimensions for addition.");
         return null;
@@ -147,14 +171,8 @@ function matrixAddition(matrix1, matrix2) {
     return result;
 }
 
-
-
-
-
-
-
-
-function matrixSubtraction(matrix1, matrix2) {
+// Subtract matrices element-wise
+function subtractMatrices(matrix1, matrix2) {
     if (matrix1.length !== matrix2.length || matrix1[0].length !== matrix2[0].length) {
         alert("Matrices must have the same dimensions for subtraction.");
         return null;
@@ -169,9 +187,8 @@ function matrixSubtraction(matrix1, matrix2) {
     return result;
 }
 
-
-
-function matrixMultiplication(matrix1, matrix2) {
+// Multiply matrices
+function multiplyMatrices(matrix1, matrix2) {
     if (matrix1[0].length !== matrix2.length) {
         alert("Number of columns of the first matrix must equal the number of rows of the second matrix for multiplication.");
         return null;
@@ -193,11 +210,8 @@ function matrixMultiplication(matrix1, matrix2) {
     return result;
 }
 
-
-
-
-
-function matrixTranspose(matrix) {
+// Transpose a matrix
+function transposeMatrix(matrix) {
     let transpose = [];
     for (let i = 0; i < matrix[0].length; i++) {
         transpose[i] = [];
@@ -208,72 +222,8 @@ function matrixTranspose(matrix) {
     return transpose;
 }
 
+// Listen for changes in the operation dropdown
+document.getElementById("operation-select").addEventListener("change", performMatrixOperation);
 
-
-
-// ICONS DROPDOWN & SELECTION
-const iconsDropdown = document.getElementById("icons");
-const iconsDropdownArrowDown = document.getElementById("icons_dropdown_down_button");
-const iconsDropdownArrowUp = document.getElementById("icons_dropdown_up_button");
-const selectedIcons = document.getElementById("selected_icon");
-const defaultIcon = document.getElementById("default_icon");
-
-const iconButtons = [
-    document.getElementById("plus"),
-    document.getElementById("minus"),
-    document.getElementById("multiply"),
-    document.getElementById("transpose")
-];
-
-//ICON SELECTION
-iconButtons.forEach(icon => {
-    icon.addEventListener("click", () => {
-        selectedIcons.innerHTML = icon.innerHTML;
-        selectedIcons.value = icon.value;
-        defaultIcon.innerHTML = icon.innerHTML;
-        defaultIcon.value = icon.value;
-        updateIconsVisibility();
-        defaultIcon.click();
-    });
-});
-
-
-iconsDropdown.style.display = "none";
-iconsDropdownArrowUp.style.display = "none";
-
-iconsDropdownArrowDown.addEventListener("click", () => {
-    iconsDropdown.style.display = "block";
-    iconsDropdownArrowDown.style.display = "none";
-    iconsDropdownArrowUp.style.display = "block";
-});
-
-iconsDropdownArrowUp.addEventListener("click", () => {
-    iconsDropdown.style.display = "none";
-    iconsDropdownArrowDown.style.display = "block";
-    iconsDropdownArrowUp.style.display = "none";
-});
-
-
-
-function updateIconsVisibility() {
-    iconButtons.forEach(icon => {
-        if (icon.innerHTML === defaultIcon.innerHTML) {
-            icon.style.display = "none";
-        } else {
-            icon.style.display = "inline-block";
-        }
-    });
-}
-
-
-
-const default_icon = document.getElementById("default_icon");
-const selected_icon = document.getElementById("selected_icon");
-if (default_icon.innerHTML == selected_icon.innerHTML) {
-    selected_icon.style.display = "none";
-}
-
-
-
-updateIconsVisibility();
-defaultIcon.addEventListener("click", performOperation);
+// Add event listener for the create matrix button
+document.getElementById("create-matrix-btn").addEventListener("click", createMatrix);
