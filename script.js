@@ -13,7 +13,6 @@ function createMatrix() {
     }
     matrices.push(matrix);
     updateMatrixDropdowns();
-    displayAllMatrices();
 }
 
 // Update matrix dropdowns when a new matrix is added
@@ -34,39 +33,25 @@ function updateMatrixDropdowns() {
     matrixTwoDropdown.addEventListener("change", (event) => handleMatrixSelection(event, "second-matrix-display"));
 }
 
-// Handle matrix selection and display
+// Handle matrix selection and display only the selected matrix
 function handleMatrixSelection(event, containerId) {
     const selectedMatrixIndex = event.target.value;
-    displayMatrix(matrices[selectedMatrixIndex], containerId, selectedMatrixIndex);
-}
-
-// Display all matrices in the designated areas
-function displayAllMatrices() {
-    const allMatricesDisplay = document.getElementById("all-matrices-display");
-    const secondAllMatricesDisplay = document.getElementById("all-matrices-display-second");
-
-    allMatricesDisplay.innerHTML = '';
-    secondAllMatricesDisplay.innerHTML = '';
-
-    matrices.forEach((matrix, index) => {
-        allMatricesDisplay.innerHTML += `<div class="matrix-container"><h3>Matrix ${index + 1}</h3>${matrixToTable(matrix, index)}</div>`;
-        secondAllMatricesDisplay.innerHTML += `<div class="matrix-container"><h3>Matrix ${index + 1}</h3>${matrixToTable(matrix, index)}</div>`;
-    });
+    displayMatrix(matrices[selectedMatrixIndex], containerId);
 }
 
 // Display the selected matrix in the specified container
-function displayMatrix(matrix, containerId, matrixIndex) {
+function displayMatrix(matrix, containerId) {
     const matrixDisplay = document.getElementById(containerId);
-    matrixDisplay.innerHTML = matrixToTable(matrix, matrixIndex);
+    matrixDisplay.innerHTML = matrixToTable(matrix);
 }
 
 // Convert a matrix to an HTML table format
-function matrixToTable(matrix, matrixIndex) {
+function matrixToTable(matrix) {
     let html = '<table border="1" class="matrix-table">';
     matrix.forEach((row, rowIndex) => {
         html += '<tr>';
         row.forEach((cell, colIndex) => {
-            html += `<td data-row="${rowIndex}" data-col="${colIndex}" data-matrix="${matrixIndex}" onclick="editCell(event)">${cell}</td>`;
+            html += `<td data-row="${rowIndex}" data-col="${colIndex}" onclick="editCell(event)">${cell}</td>`;
         });
         html += '</tr>';
     });
@@ -74,23 +59,26 @@ function matrixToTable(matrix, matrixIndex) {
     return html;
 }
 
-// Prompt the user to edit a cell value
 function editCell(event) {
     const cell = event.target;
     const row = cell.getAttribute('data-row');
     const col = cell.getAttribute('data-col');
-    const matrixIndex = cell.getAttribute('data-matrix');
-    
-    // Prompt user for new value
+    const matrixIndex = matrices.findIndex(matrix => matrix.some(r => r.includes(parseInt(cell.innerText, 10))));
     const newValue = prompt("Enter new value:", cell.innerText);
-    
-    // Update matrix and cell value if valid
     if (newValue !== null) {
         const parsedValue = parseInt(newValue, 10);
         if (!isNaN(parsedValue)) {
             matrices[matrixIndex][row][col] = parsedValue;
-            cell.innerText = parsedValue;
-            updateMatrixDisplays(); // Update all matrix displays
+            const matrixDropdown = document.getElementById("matrix-one");
+            const selectedMatrixIndex = matrixDropdown.value;
+            if (selectedMatrixIndex == matrixIndex) {
+                displayMatrix(matrices[matrixIndex], "selected-matrix-display");
+            }
+            const secondMatrixDropdown = document.getElementById("matrix-two");
+            const selectedSecondMatrixIndex = secondMatrixDropdown.value;
+            if (selectedSecondMatrixIndex == matrixIndex) {
+                displayMatrix(matrices[matrixIndex], "second-matrix-display");
+            }
         } else {
             alert("Please enter a valid number.");
         }
@@ -103,55 +91,60 @@ function updateMatrixDisplays() {
     const matrixTwoIndex = document.getElementById("matrix-two").value;
 
     if (matrixOneIndex !== "" && matrixOneIndex !== null) {
-        displayMatrix(matrices[matrixOneIndex], "selected-matrix-display", matrixOneIndex);
+        displayMatrix(matrices[matrixOneIndex], "selected-matrix-display");
     }
     if (matrixTwoIndex !== "" && matrixTwoIndex !== null) {
-        displayMatrix(matrices[matrixTwoIndex], "second-matrix-display", matrixTwoIndex);
+        displayMatrix(matrices[matrixTwoIndex], "second-matrix-display");
     }
-    
-    displayAllMatrices(); // Ensure all matrices are updated
 }
 
 // Perform the selected matrix operation
 function performMatrixOperation() {
-    const selectedOperation = document.getElementById("operation-select").value;
+    const operationSelectElement = document.getElementById("operation-select");
+    const selectedOperation = operationSelectElement.value;
     const matrix1Index = document.getElementById("matrix-one").value;
     const matrix2Index = document.getElementById("matrix-two").value;
     let resultMatrix;
 
-    if (selectedOperation === "") {
+    if (!selectedOperation) {
         alert("Please select an operation.");
         return;
     }
 
-    if (selectedOperation === "+" || selectedOperation === "-" || selectedOperation === "*" || selectedOperation === "transpose") {
-        if (selectedOperation !== "transpose" && (matrix1Index === "" || matrix2Index === "")) {
-            alert("Please select both matrices.");
+    if (selectedOperation !== "transpose" && (matrix1Index === "" || matrix2Index === "")) {
+        alert("Please select both matrices.");
+        return;
+    }
+
+    const matrix1 = matrices[matrix1Index];
+    let matrix2;
+
+    // For transpose, only one matrix is needed
+    if (selectedOperation !== "transpose") {
+        matrix2 = matrices[matrix2Index];
+    }
+
+    switch (selectedOperation) {
+        case "+":
+            resultMatrix = addMatrices(matrix1, matrix2);
+            break;
+        case "-":
+            resultMatrix = subtractMatrices(matrix1, matrix2);
+            break;
+        case "*":
+            resultMatrix = multiplyMatrices(matrix1, matrix2);
+            break;
+        case "transpose":
+            resultMatrix = transposeMatrix(matrix1);
+            break;
+        default:
+            alert("Invalid operation selected.");
             return;
-        }
-        const matrix1 = matrices[matrix1Index];
-        const matrix2 = matrices[matrix2Index];
-        switch (selectedOperation) {
-            case "+":
-                resultMatrix = addMatrices(matrix1, matrix2);
-                break;
-            case "-":
-                resultMatrix = subtractMatrices(matrix1, matrix2);
-                break;
-            case "*":
-                resultMatrix = multiplyMatrices(matrix1, matrix2);
-                break;
-            case "transpose":
-                resultMatrix = transposeMatrix(matrix1);
-                break;
-        }
-        if (resultMatrix) {
-            displayMatrix(resultMatrix, "result-display");
-        } else {
-            alert("Operation could not be performed. Check the dimensions of the matrices.");
-        }
-    } else {
-        alert("Please select a valid operation.");
+    }
+
+    if (resultMatrix) {
+        // Display the result in the result-display container
+        displayMatrix(resultMatrix, "result-display");
     }
 }
 
@@ -198,10 +191,6 @@ function multiplyMatrices(matrix1, matrix2) {
         result[i] = [];
         for (let j = 0; j < matrix2[0].length; j++) {
             result[i][j] = 0;
-        }
-    }
-    for (let i = 0; i < matrix1.length; i++) {
-        for (let j = 0; j < matrix2[0].length; j++) {
             for (let k = 0; k < matrix1[0].length; k++) {
                 result[i][j] += matrix1[i][k] * matrix2[k][j];
             }
@@ -212,18 +201,12 @@ function multiplyMatrices(matrix1, matrix2) {
 
 // Transpose a matrix
 function transposeMatrix(matrix) {
-    let transpose = [];
+    let result = [];
     for (let i = 0; i < matrix[0].length; i++) {
-        transpose[i] = [];
+        result[i] = [];
         for (let j = 0; j < matrix.length; j++) {
-            transpose[i][j] = matrix[j][i];
+            result[i][j] = matrix[j][i];
         }
     }
-    return transpose;
+    return result;
 }
-
-// Listen for changes in the operation dropdown
-document.getElementById("operation-select").addEventListener("change", performMatrixOperation);
-
-// Add event listener for the create matrix button
-document.getElementById("create-matrix-btn").addEventListener("click", createMatrix);

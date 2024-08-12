@@ -9,7 +9,7 @@
 </head>
 <body>
     <div class="button-container">
-        <button id="create-matrix-btn">Create Matrix</button>
+        <button onclick="createMatrix()">Create Matrix</button>
     </div>
     <div class="left-container">
         <label for="matrix-one">Choose a Matrix:</label>
@@ -18,11 +18,10 @@
         </select>
         <br><br>
         <div id="selected-matrix-display"></div>
-        <div id="all-matrices-display"></div>
     </div>
     <div class="center-container">
         <label for="operation-select">Select Operation:</label>
-        <select id="operation-select">
+        <select id="operation-select" onchange="performMatrixOperation()">
             <option value="" disabled selected>Select an operation</option>
             <option value="+">Addition (+)</option>
             <option value="-">Subtraction (-)</option>
@@ -37,7 +36,6 @@
         </select>
         <br><br>
         <div id="second-matrix-display"></div>
-        <div id="all-matrices-display-second"></div>
     </div>
     <div class="result-container">
         <h3>Result:</h3>
