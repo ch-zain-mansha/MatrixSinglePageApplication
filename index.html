@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Matrix Operations</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.3.0/fonts/remixicon.css" rel="stylesheet"/>
+</head>
+<body>
+    <div class="button-container">
+        <button onclick="createMatrix()">Create Matrix</button>
+    </div>
+    <div class="left-container">
+        <label for="matrix-one">Choose a Matrix:</label>
+        <select name="matrix-one" id="matrix-one">
+            <option value="" disabled selected>Select a matrix</option>
+        </select>
+        <br><br>
+        <div id="selected-matrix-display"></div>
+    </div>
+    <div class="center-container">
+        <label for="operation-select">Select Operation:</label>
+        <select id="operation-select" onchange="performMatrixOperation()">
+            <option value="" disabled selected>Select an operation</option>
+            <option value="+">Addition (+)</option>
+            <option value="-">Subtraction (-)</option>
+            <option value="*">Multiplication (*)</option>
+            <option value="transpose">Transpose</option>
+        </select>
+    </div>    
+    <div class="right-container">
+        <label for="matrix-two">Choose a Matrix:</label>
+        <select name="matrix-two" id="matrix-two">
+            <option value="" disabled selected>Select a matrix</option>
+        </select>
+        <br><br>
+        <div id="second-matrix-display"></div>
+    </div>
+    <div class="result-container">
+        <h3>Result:</h3>
+        <div id="result-display"></div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
